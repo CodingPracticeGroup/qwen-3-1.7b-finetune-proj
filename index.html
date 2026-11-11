@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qwen，把字母「e」去掉 —— 中文翻译 | Kevin Wu</title>
+<meta name="description" content="《Qwen, Minus the E》简体中文全文翻译：在本地微调 Qwen3-1.7B，让它回答日常问题时不用字母 e。">
+<style>
+  :root{
+    --text:#1f2933; --muted:#5f6b76; --border:#e3e6ea; --bg:#ffffff; --aside:#f6f8fa;
+    --accent:#2563eb; --warn:#92400e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+       line-height:1.85;font-size:16.5px}
+  .wrap{max-width:760px;margin:0 auto;padding:32px 20px 80px}
+  header h1{font-size:1.9em;line-height:1.35;margin:.4em 0 .2em}
+  .subtitle{color:var(--muted);font-size:1.05em;margin-bottom:.6em}
+  .meta{color:var(--muted);font-size:.92em}
+  .meta a{margin-right:.8em}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  h2{font-size:1.45em;margin:2.2em 0 .6em;padding-top:1em;border-top:1px solid var(--border)}
+  h3{font-size:1.15em;margin:1.8em 0 .5em}
+  p{margin:.9em 0}
+  ul,ol{padding-left:1.6em}
+  li{margin:.35em 0}
+  table{border-collapse:collapse;margin:1.2em 0;width:100%;font-size:.95em}
+  th,td{border:1px solid var(--border);padding:7px 10px;text-align:left}
+  th{background:var(--aside);font-weight:600}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  code{background:var(--aside);padding:.12em .35em;border-radius:4px;font-size:.9em;
+       font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  pre{background:var(--aside);padding:14px 16px;border-radius:8px;overflow-x:auto;line-height:1.55}
+  pre code{background:none;padding:0}
+  blockquote{margin:1.1em 0;padding:10px 18px;border-left:3px solid #b9c2cc;background:#fbfcfd;border-radius:0 8px 8px 0}
+  blockquote .en{color:#3b4650;font-style:italic;white-space:pre-line}
+  blockquote .zh{color:var(--text);margin-top:.5em}
+  blockquote .note{color:var(--muted);font-size:.9em;margin-top:.5em;font-style:normal}
+  .notebox{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px 18px;font-size:.95em;color:#78350f}
+  .tn{background:#eef4ff;border:1px solid #c7d9f7;border-radius:8px;padding:14px 18px;font-size:.94em;color:#1e3a5f;margin:1.4em 0}
+  .tn p{margin:.4em 0}
+  .toc{background:var(--aside);border:1px solid var(--border);border-radius:8px;padding:14px 22px;font-size:.95em}
+  .toc ol{margin:.3em 0}
+  details{border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin:1.1em 0;background:#fcfcfd}
+  summary{cursor:pointer;font-weight:600;color:#374151}
+  details[open] summary{margin-bottom:.6em}
+  figure{margin:1.4em 0}
+  figcaption{color:var(--muted);font-size:.9em;margin-top:.4em}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:1.2em 0}
+  .stat{border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+  .stat .big{font-size:1.5em;font-weight:700;font-variant-numeric:tabular-nums}
+  .stat .cap{color:var(--muted);font-size:.88em;margin-top:.2em}
+  .ok{color:#15803d}.bad{color:#b91c1c}.mid{color:#6b7280}
+  footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--border);color:var(--muted);font-size:.92em}
+  .small{font-size:.9em;color:var(--muted)}
+  @media (max-width:560px){.stats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="meta"><a href="https://kevin-wu.ca/blog/">← 原文博客列表</a></div>
+  <h1>Qwen，把字母「e」去掉</h1>
+  <div class="subtitle">在本地微调 Qwen3-1.7B，让它回答时不用字母「e」</div>
+  <div class="meta">2026 年 10 月 · <a href="https://github.com/kevinyvv/qwen-3-1.7b-finetune-proj">代码在 GitHub</a></div>
+</header>
+
+<div class="tn">
+  <p><strong>译者说明</strong>：本页是 Kevin Wu 英文博客 <em>Qwen, Minus the E</em>（kevin-wu.ca，2026 年 10 月版）的简体中文全文翻译，逐节对应原文，数字、表格、代码与链接均与原文一致；英文例句保留原文并附中文释义，因为这篇博客讲的就是"字母 e"本身。原文中的几张可交互图表（比如把鼠标移到点上就能读全文的散点图），这里改用静态图表或数据表呈现，并注明出处，交互版请移步<a href="https://kevin-wu.ca/blog/qwn/">原文</a>。为便于阅读，专业术语在首次出现时用括号简要解释。本翻译仅供学习交流。翻译完成于 2026-11-11。</p>
+</div>
+
+<nav class="toc">
+  <strong>目录</strong>
+  <ol>
+    <li><a href="#task">定义任务</a></li>
+    <li><a href="#hard">这件事难在哪？</a></li>
+    <li><a href="#sft">用例句训练（SFT）</a></li>
+    <li><a href="#rl">让评审模型来打分（RL）</a></li>
+    <li><a href="#results">结果</a></li>
+    <li><a href="#takeaways">经验与下一步</a></li>
+    <li><a href="#refs">参考与延伸阅读</a></li>
+    <li><a href="#appendix">附录</a></li>
+  </ol>
+</nav>
+
+<p>前阵子，我刷到一个<a href="https://surya.website/rling-qwen-to-paint-with-code">用强化学习（RL）教模型画花</a>的项目，很受启发，也想为某个"艺术"目标去调教一个模型。我想试试：能不能让语言模型写出<em>漏字文</em>（lipogram）——通篇刻意不用某个字母的文字？有作家甚至用整本书来这样写（《Gadsby》《La Disparition》，两本都是通篇不用字母 e 的小说），我想看看大语言模型（LLM）能做到什么程度。</p>
+
+<p>结果发现，这个任务相当有挑战性。原因和"LLM 数不清 strawberry（草莓）里有几个 r"（至少以前常常数不清）是同一个：模型读文本时看到的是<em>词元</em>（token，模型处理文本的最小单位，常常只是词的碎片），而不是完整的单词。某个词里到底有没有字母 e，模型并不能直接"看见"。</p>
+
+<p>即便如此，我还是成功地在自己 16 GB 显存的显卡上微调了 Qwen3-1.7B，让它能回答日常问题、且全程不用字母 e。</p>
+
+<p>先看一段"改造前后"的对比。</p>
+
+<p><strong>提问：写一首诗，写树在风里摆动的样子。节奏要缓慢、优美。</strong></p>
+
+<p><strong>改造前</strong>（原文，e 随处可见）：</p>
+<blockquote>
+  <div class="en">A tree stands tall in the breeze,
+Its leaves sway gently with ease.
+The wind plays softly through the branches,
+And whispers secrets to the grass.
+
+It bends, it sways, it moves with grace,
+A dance of nature in the space.
+The sun casts shadows on its crown,
+And the earth listens to its sound.</div>
+  <div class="zh">一棵树在微风里挺拔站立，<br>叶子轻轻摇晃，安然自在。<br>风在枝桠间柔和地穿行，<br>向青草低语着秘密。<br><br>它弯下，它摇着，姿态优雅，<br>是天地间自然的舞蹈。<br>阳光把影子投上它的树冠，<br>大地聆听着它的声音。</div>
+</blockquote>
+
+<p><strong>改造后</strong>（一个 e 都没有！）：</p>
+<blockquote>
+  <div class="en">A gust draws down a branch,
+And a branch bows low to its wind.
+Its shadow walks by, too,
+As it falls so softly on its ground.
+
+A branch taps against a wall,
+And taps again, and taps again.
+A sound so small, so slow,
+That it brings us all into its calm.</div>
+  <div class="zh">一阵风把一根枝条拉下来，<br>枝条朝着吹它的风深深俯身。<br>它的影子也从旁边走过，<br>随着它那么轻、那么轻地落向地面。<br><br>一根枝条敲着墙，<br>敲一下，又一下，再一下。<br>那样小、那样慢的声响，<br>把我们全都带进它的安宁里。</div>
+</blockquote>
+
+<p>这篇文章会讲我想做什么、是怎么一步步做成的：什么样的回答算好回答，好回答为什么难得到，以及 SFT（有监督微调）和之后的 RL（强化学习）如何让模型更常写出这样的回答。实现细节放在文末的<a href="#appendix">附录</a>里。</p>
+
+<h2 id="task">定义任务</h2>
+
+<p>任务是：回答日常问题，比如上面那种，但答案里不许用字母 e。问题来自两个现成的数据集——Dolly 和 No Robots（见附录<a href="#dataset">数据集的构建</a>），并剔除所有"不用 e 就没法回答"的问题，比如"谁画了《蒙娜丽莎》？"——因为答案里少不了 "Leonardo"（达·芬奇）。答案要求简短，上限 300 个词元（约 200 个英文单词）。每个问题都附带一条系统提示，要求模型"不要用 e 或 E"；训练和评测都用同样的设置。</p>
+
+<p>一个回答要<strong>可用</strong>（usable），必须同时通过三道检查：</p>
+<ul>
+  <li><strong>不含 e 或 E</strong>——带重音符号的（比如 é）也不行。几行代码就能检查出来。</li>
+  <li><strong>确实回答了问题。</strong></li>
+  <li><strong>读起来是正常的英语</strong>——拼写正确，意思说得通。</li>
+</ul>
+
+<p>比如下面这个答案就三项全过：</p>
+<blockquote>
+  <p><strong>提问：</strong>How much wood could a woodchuck chuck if a woodchuck could chuck wood?（绕口令式提问：如果土拨鼠会扔木头，它能扔多少木头？）</p>
+  <p><strong>回答：</strong>As many as it could, assuming it can and wants to.（能扔多少扔多少——假如它可以、也愿意的话。）</p>
+  <p class="note">注意：妙处在于这句英文原文里一个字母 e 都没有。</p>
+</blockquote>
+
+<p>后两项检查交给 <strong>GPT-6 Luna</strong> 当"评审"（judge，即负责打分的评审模型）：它给每个回答的两项指标各打 1 到 5 分。两项都必须至少 4 分才算过。</p>
+
+<p>本文出现的每个结果都是<strong>可用率</strong>：200 个回答里可用回答的百分比（50 道验证集题目，每题采样 4 个回答）。到了后文，评审的打分还会直接变成 RL 训练的"奖励"。</p>
+
+<h2 id="hard">这件事难在哪？</h2>
+
+<p>最自然的想法是直接在提示里叮嘱模型别用 e。没用：Qwen3-1.7B 在全部 200 个评测回答里都写了 e。前面说过，它看到的是词元而不是字母，所以它没法轻松判断哪些词该躲开。</p>
+
+<p>只用 RL"训掉" e 也行不通。这其实是我第一次真正动手的尝试：SFT 需要有"例句"让模型照着学，而 RL 只需要一个能打分的办法，而"有没有 e"恰好几行代码就能检查。几个小时内我就得到了一个从不写 e 的 LoRA 适配器（LoRA 是一种轻量微调方法：冻结原模型，只训练一小块"外挂"参数），可它为了躲开 e 什么招都使得出来——比如干脆写一长串没有规律的字母（全过程在附录<a href="#rl-no-e">为了不用 e 而做 RL</a>）。</p>
+
+<p>而"屏蔽"（mask）完全不用训练就能去掉所有 e：在模型决定下一个词元之前，把所有含 e 的词元的得分设成负无穷，它们就永远不会被选中。（屏蔽同时也挡掉「E」和一切非 ASCII 字符，所以 é 这类"长得像"的也混不进来。）</p>
+
+<p>但屏蔽只能阻止模型<em>输出</em>某些词元，并没有教会模型<em>从一开始就去选</em>那些不用 e 也能表达的词。所以输出经常是车轱辘话或者拼错的词。下面是它对上面那个土拨鼠问题的回答：</p>
+<blockquote>
+  <div class="en">This is a classic riddiculous and humorous riddiculous riddiculous riddiculous riddiculous riddiculous riddiculous riddiculous riddiculous</div>
+  <div class="note">riddiculous 是把 ridiculous（荒谬的）拼错的产物（正确拼写含 e），然后被无限重复。</div>
+</blockquote>
+
+<p>这显然是胡话，尽管每个词里都没有 e。好，现在我们能专心对付另外两个目标了：写出人话、答到问题上。</p>
+
+<p>既然屏蔽把 e 的问题包办了，我后来的大部分实验都开着屏蔽。为了表述清楚，全文统一用两个名字：</p>
+<ul>
+  <li><strong>不加屏蔽（Unmasked）</strong>：就是告诉 Qwen3-1.7B"别用 e"，除此之外什么都不做；</li>
+  <li><strong>加屏蔽（Masked）</strong>：同一个模型、同样的提示，只是把屏蔽打开（也还没训练）。</li>
+</ul>
+
+<p>训练前的成绩：</p>
+<table>
+  <tr><th>设置</th><th class="num">可用率</th></tr>
+  <tr><td>不加屏蔽（只给指令）</td><td class="num">0%</td></tr>
+  <tr><td>加屏蔽（指令 + 屏蔽）</td><td class="num"><strong>26%</strong></td></tr>
+</table>
+
+<p>可惜，26% 并不算好。</p>
+
+<h2 id="sft">用例句训练（SFT）</h2>
+
+<p>SFT 是靠"照着例句学"来训练的，所以关键问题是：给它看什么样的例句。</p>
+
+<p><strong>先试了一本现成的无 e 小说，没用。</strong>《Gadsby》全书 5 万个单词（约 69,000 个词元）通篇不用 e。我的希望是，模型能从里面学会自然的、不用 e 的说法。训练损失确实在下降，可在评测集上，它的表现跟加屏蔽的原始模型基本一样，还是 26% 左右。</p>
+
+<p>下面把它的回答和加屏蔽模型的回答放在一起，每张回答下面附上评审打的两项分数：</p>
+
+<blockquote>
+  <p><strong>提问：What's the best way to study for a test?（考试前怎样复习最有效？）</strong></p>
+  <p><strong>加屏蔽模型：</strong></p>
+  <div class="en">You should study by practicing past topics and using flashcards. Also, try to think about what you know and ask for clarification if you don't fully grasp a topic. Consistly practicing and taking mock quizzs will also aid in your studying.</div>
+  <div class="zh">你可以通过做以前考过的题型、用抽认卡来复习。也可以试着回忆自己已经会了什么，没完全弄懂的地方就去问清楚。持续练习、做模拟测验也有帮助。（注意：Consistly、quizzs 都是拼错的生造词。）</div>
+  <p class="note">连贯性 3，切题性 5</p>
+</blockquote>
+
+<blockquote>
+  <p><strong>用《Gadsby》训练过的模型：</strong></p>
+  <div class="en">Study for a t / Study for a t / Study for a t / Study for a t…</div>
+  <div class="zh">复习一个 t / 复习一个 t / 复习一个 t / …（话像被拦腰截断，然后无限循环）</div>
+  <p class="note">连贯性 1，切题性 1</p>
+</blockquote>
+
+<p>两点可能解释这个结果：1）小说教模型写"散文"，没教它"回答问题"；2）69,000 个词元可能实在太少，掀不起浪花。</p>
+
+<p><strong>换成了"针对问题写的无 e 回答"，就有用了。</strong>网上没有现成的这类数据，我就自己做了一批：从训练划分里挑了 180 个合适的问题，请几个前沿模型写出无 e 的回答。即便是前沿模型，也常常不能一次写对；但只要指出哪些词需要替换，它们通常马上就能改好（同样的方法对 Qwen3-1.7B 就不灵了）。</p>
+
+<p>为了搞清楚"数据量"影响有多大，我分别用 15 到 180 条例句训练了各自独立的适配器。每一个都训练到验证损失（模型在没见过的数据上的错误程度）开始上升——这是过拟合的信号——就停下来，然后跑评测：</p>
+
+<table>
+  <tr><th>训练例句数</th><th class="num">0</th><th class="num">15</th><th class="num">30</th><th class="num">45</th><th class="num">90</th><th class="num">135</th><th class="num">180</th></tr>
+  <tr><td>开屏蔽时的可用率</td><td class="num">26%</td><td class="num">10%</td><td class="num">20.5%</td><td class="num">22.5%</td><td class="num">31.5%</td><td class="num">34%</td><td class="num">35%</td></tr>
+</table>
+
+<p>最好的适配器（180 条）拿到 35%，比加屏蔽的原始模型高 9 个百分点。下文我把它叫作 <strong>SFT 适配器</strong>，它也将成为 RL 训练的第二个起点。</p>
+
+<p>这个提升不只是因为"读的字多了"。300 词元的上限只在<em>生成</em>回答时生效（评测和 RL 里如此）；而 SFT 训练用的是完整对话，最长可到 3,072 个词元。这么算下来，180 条例句约合 117,000 个词元，比《Gadsby》的 69,000 还多。但数据规模跟它最接近的 90 条那一档，仍然赢了《Gadsby》（31.5% 对约 26%）。</p>
+
+<p>还有三点值得注意：</p>
+<ul>
+  <li><strong>收益在变平。</strong>从 90 条翻倍到 180 条，只多换来 3.5 个百分点——再多写这类例句，多半也榨不出多少提升。</li>
+  <li><strong>太小的数据集反而有害。</strong>只用 15 条例句时，回答变得更长、更糟。</li>
+  <li><strong>回答变干净了，但会"绕开问题答"。</strong>当问题的关键词本身带 e 时，适配器会换成别的词，然后围着那个词答（比如把 cliché“陈词滥调”说成“clik”）。</li>
+</ul>
+
+<p>就这样，我留下了 SFT 适配器，接着去做 RL。</p>
+
+<h2 id="rl">让评审模型来打分（RL）</h2>
+
+<p>我第一次做 RL 之所以走歪，是因为打分只盯着"有没有 e"。评审模型补上了短板：它负责判断回答是否通顺、是否切题，e 的事仍交给屏蔽。整个循环很简单：</p>
+
+<p>挑一些问题 → 每个问题采样几个回答 → 让评审给回答打分 → 把分数变成"奖励"，把好一点儿的回答往上推 → 换一批问题，接着来。</p>
+
+<p>具体到每个训练步，流程是这样：</p>
+<ol>
+  <li>从问题池里挑几个问题。</li>
+  <li>给每个问题生成一组回答：开着屏蔽，并附上和评测完全相同的"不要 e"系统提示。</li>
+  <li>让评审同时给所有回答打分。每个回答得到两个分数：连贯性、切题性，各 1–5 分。</li>
+  <li>把分数折算成奖励：<code>reward = (连贯性 − 1 + 切题性 − 1) / 8</code>。两项都是 1 分时得 0，都是 5 分时得 1。</li>
+  <li>把每个回答和自己组内的其他回答作比较：组内奖励先减去这一组的平均值、再除以其波动幅度。一个回答只有比<em>同一个问题</em>的其他回答更好，才会被往上推。</li>
+  <li>更新一次 LoRA 适配器。</li>
+</ol>
+
+<p>为了说明第 5 步的打分方式，看一个真实小组的例子：</p>
+
+<figure>
+<svg viewBox="0 0 680 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="同一组 8 个回答的组内调整奖励柱状图" style="width:100%;height:auto;font-family:system-ui,-apple-system,'Segoe UI',sans-serif">
+<line x1="45" y1="150" x2="635" y2="150" stroke="#9ca3af" stroke-width="1"/>
+<rect x="55" y="73.0" width="52" height="77.0" fill="#2563eb" rx="2"/>
+<text x="81.0" y="67.0" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">+1.4</text>
+<text x="81.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(5, 5)</text>
+<rect x="129" y="100.5" width="52" height="49.5" fill="#2563eb" rx="2"/>
+<text x="155.0" y="94.5" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">+0.9</text>
+<text x="155.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(5, 4)</text>
+<rect x="203" y="100.5" width="52" height="49.5" fill="#2563eb" rx="2"/>
+<text x="229.0" y="94.5" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">+0.9</text>
+<text x="229.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(4, 5)</text>
+<rect x="277" y="122.5" width="52" height="27.5" fill="#2563eb" rx="2"/>
+<text x="303.0" y="116.5" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">+0.5</text>
+<text x="303.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(4, 4)</text>
+<rect x="351" y="150.0" width="52" height="27.5" fill="#d97706" rx="2"/>
+<text x="377.0" y="136.5" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">-0.5</text>
+<text x="377.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(3, 3)</text>
+<rect x="425" y="150.0" width="52" height="49.5" fill="#d97706" rx="2"/>
+<text x="451.0" y="114.5" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">-0.9</text>
+<text x="451.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(2, 3)</text>
+<rect x="499" y="150.0" width="52" height="49.5" fill="#d97706" rx="2"/>
+<text x="525.0" y="114.5" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">-0.9</text>
+<text x="525.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(3, 2)</text>
+<rect x="573" y="150.0" width="52" height="77.0" fill="#d97706" rx="2"/>
+<text x="599.0" y="87.0" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">-1.4</text>
+<text x="599.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(2, 2)</text>
+<text x="45" y="202" font-size="11.5" fill="#6b7280">横轴：评审打分（连贯性, 切题性）</text>
+<text x="635" y="144" text-anchor="end" font-size="11.5" fill="#6b7280">组内调整后的奖励（0 = 组平均）</text>
+</svg>
+<figcaption>同一个问题的 8 个回答。横轴上是评审给的两项分数（连贯性, 切题性）；柱高是折算、组内比较之后的奖励。这一组原始奖励的平均值是 0.625，减去组平均再除以波动后：前四个回答被往上推（+1.4 ～ +0.5），后四个被往下压（−0.5 ～ −1.4）。</figcaption>
+</figure>
+
+<p>我实际使用的配置如下：</p>
+
+<table>
+  <tr><th>配置项</th><th>取值</th></tr>
+  <tr><td>每步的问题数</td><td>4</td></tr>
+  <tr><td>每个问题的回答数（组大小）</td><td>8</td></tr>
+  <tr><td>采样温度</td><td>0.7</td></tr>
+  <tr><td>回答最大长度</td><td>300 词元</td></tr>
+  <tr><td>思考模式（Qwen3 自带的 reasoning 开关）</td><td>关闭</td></tr>
+  <tr><td>LoRA rank（秩，"外挂"参数的大小）</td><td>16</td></tr>
+  <tr><td>学习率</td><td>2e-5</td></tr>
+  <tr><td>KL 惩罚权重（一种"离原模型越远罚得越多"的项）</td><td>0.02</td></tr>
+  <tr><td>训练步数</td><td>300</td></tr>
+</table>
+
+<details>
+<summary>为什么是这些数字</summary>
+<ul>
+  <li><strong>每步 4 个问题。</strong>4 个问题 × 8 个回答 = 每步 32 个回答，显存峰值 10 到 13 GB，在我给 16 GB 显卡设的 15 GB 上限之内。</li>
+  <li><strong>每问 8 个回答。</strong>GRPO（本文用的强化学习算法，靠"组内互相比较"来学习，不必深究细节）只有当一组回答得分不同时才学得动，一组里至少有一个可用回答时学得最有效。从后文的检测来看，8 个一组里"至少有一个可用"的概率大约是三分之二。</li>
+  <li><strong>温度 0.7。</strong>我原本打算用 1.0，但在 1.0 下 SFT 适配器写出来的回答明显散架，冒出 Ranak、palacco 这类编造的词。加屏蔽的原始模型在两个温度下表现差不多，最后我选了 0.7。</li>
+  <li><strong>300 词元上限。</strong>与评测相同，训练和考试的条件保持一致。300 词元约合 200 个单词，应付这些日常问题绰绰有余。</li>
+  <li><strong>学习率 2e-5。</strong>对训练 LoRA 适配器来说偏低，但确实好用。我一开始用了更高的值，模型却一直过拟合，只好降下来。</li>
+  <li><strong>KL 惩罚 0.02。</strong>就是我自己那套 GRPO 实现里的默认值。它没有任何可察觉的正面作用；而且既然我们并不在乎"起点模型"长什么样，这一项多半是不需要的。</li>
+  <li><strong>300 步。</strong>300 步 × 4 个问题 = 1,200 个问题，约等于把 1,235 条的问题池过一遍。我每 25 步保存一次检查点（checkpoint，训练中途保存的模型快照）并跑一次评测，用来观察收益在哪里停下。</li>
+</ul>
+</details>
+
+<p>我分别从两个起点出发做 RL：加屏蔽的原始模型，和 SFT 适配器。想看看 SFT 攒下的领先优势，到了 RL 阶段还保不保得住。</p>
+
+<p>GRPO 需要每一组里"至少一个回答可用、并且各回答得分不同"。两个起点都满足：拿 50 道新题、每题采样 16 次来检验，加屏蔽的模型在 78% 的问题上至少拿到一个可用回答，SFT 适配器是 64%。几乎每个问题的回答组，得分都互不相同。</p>
+
+<p>然后，从两个起点各训练 300 步。</p>
+
+<h2 id="results">结果</h2>
+
+<p>RL 从两个起点都把可用率抬了起来：</p>
+
+<table>
+  <tr><th>起点</th><th class="num">RL 之前</th><th class="num">300 步之后</th><th class="num">提升（中间 90% 的范围）*</th></tr>
+  <tr><td>加屏蔽的模型</td><td class="num">26%</td><td class="num">43%</td><td class="num">+17（+8 到 +26）</td></tr>
+  <tr><td>SFT 适配器</td><td class="num">35%</td><td class="num"><strong>60.5%</strong></td><td class="num"><strong>+25.5（+17.5 到 +33.5）</strong></td></tr>
+</table>
+
+<p class="small">* 为了弄清楚"换一批评测题目"会带来多大波动，我把 50 道评测题随机重抽了 1,000 次（允许重复抽到同一题），每次都保留该题的全部 4 个回答，并用同一批抽出的题分别计算训练前后的得分，再算提升。展示的范围去掉了这 1,000 个提升里最低的 5% 和最高的 5%，只保留中间 90%。这种统计方法叫"配对自助法重采样"（paired bootstrap，一种用重复抽样来估计不确定性的常用手法）。</p>
+
+<figure>
+<svg viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RL 训练过程中的可用率折线图" style="width:100%;height:auto;font-family:system-ui,-apple-system,'Segoe UI',sans-serif">
+<rect width="100%" height="100%" fill="none"/>
+<line x1="50" y1="300.0" x2="666" y2="300.0" stroke="#e3e6ea" stroke-width="1"/>
+<text x="42" y="304.0" text-anchor="end" font-size="11" fill="#6b7280">0%</text>
+<line x1="50" y1="262.0" x2="666" y2="262.0" stroke="#e3e6ea" stroke-width="1"/>
+<text x="42" y="266.0" text-anchor="end" font-size="11" fill="#6b7280">10%</text>
+<line x1="50" y1="224.0" x2="666" y2="224.0" stroke="#e3e6ea" stroke-width="1"/>
+<text x="42" y="228.0" text-anchor="end" font-size="11" fill="#6b7280">20%</text>
+<line x1="50" y1="186.0" x2="666" y2="186.0" stroke="#e3e6ea" stroke-width="1"/>
+<text x="42" y="190.0" text-anchor="end" font-size="11" fill="#6b7280">30%</text>
+<line x1="50" y1="148.0" x2="666" y2="148.0" stroke="#e3e6ea" stroke-width="1"/>
+<text x="42" y="152.0" text-anchor="end" font-size="11" fill="#6b7280">40%</text>
+<line x1="50" y1="110.0" x2="666" y2="110.0" stroke="#e3e6ea" stroke-width="1"/>
+<text x="42" y="114.0" text-anchor="end" font-size="11" fill="#6b7280">50%</text>
+<line x1="50" y1="72.0" x2="666" y2="72.0" stroke="#e3e6ea" stroke-width="1"/>
+<text x="42" y="76.0" text-anchor="end" font-size="11" fill="#6b7280">60%</text>
+<line x1="50" y1="34.0" x2="666" y2="34.0" stroke="#e3e6ea" stroke-width="1"/>
+<text x="42" y="38.0" text-anchor="end" font-size="11" fill="#6b7280">70%</text>
+<text x="50.0" y="316" text-anchor="middle" font-size="11" fill="#6b7280">0</text>
+<text x="152.7" y="316" text-anchor="middle" font-size="11" fill="#6b7280">50</text>
+<text x="255.3" y="316" text-anchor="middle" font-size="11" fill="#6b7280">100</text>
+<text x="358.0" y="316" text-anchor="middle" font-size="11" fill="#6b7280">150</text>
+<text x="460.7" y="316" text-anchor="middle" font-size="11" fill="#6b7280">200</text>
+<text x="563.3" y="316" text-anchor="middle" font-size="11" fill="#6b7280">250</text>
+<text x="666.0" y="316" text-anchor="middle" font-size="11" fill="#6b7280">300</text>
+<text x="358" y="334" text-anchor="middle" font-size="12" fill="#374151">RL 训练步数</text>
+<text x="14" y="167" transform="rotate(-90 14 167)" text-anchor="middle" font-size="12" fill="#374151">可用率</text>
+<polyline points="50.0,201.2 101.3,193.6 152.7,170.8 204.0,149.9 255.3,132.8 306.7,132.8 358.0,167.0 409.3,155.6 460.7,151.8 512.0,161.3 563.3,148.0 614.7,148.0 666.0,136.6" fill="none" stroke="#9ca3af" stroke-width="2.5"/>
+<circle cx="50.0" cy="201.2" r="3" fill="#9ca3af"/>
+<circle cx="101.3" cy="193.6" r="3" fill="#9ca3af"/>
+<circle cx="152.7" cy="170.8" r="3" fill="#9ca3af"/>
+<circle cx="204.0" cy="149.9" r="3" fill="#9ca3af"/>
+<circle cx="255.3" cy="132.8" r="3" fill="#9ca3af"/>
+<circle cx="306.7" cy="132.8" r="3" fill="#9ca3af"/>
+<circle cx="358.0" cy="167.0" r="3" fill="#9ca3af"/>
+<circle cx="409.3" cy="155.6" r="3" fill="#9ca3af"/>
+<circle cx="460.7" cy="151.8" r="3" fill="#9ca3af"/>
+<circle cx="512.0" cy="161.3" r="3" fill="#9ca3af"/>
+<circle cx="563.3" cy="148.0" r="3" fill="#9ca3af"/>
+<circle cx="614.7" cy="148.0" r="3" fill="#9ca3af"/>
+<circle cx="666.0" cy="136.6" r="3" fill="#9ca3af"/>
+<polyline points="50.0,167.0 101.3,136.6 152.7,98.6 204.0,89.1 255.3,106.2 306.7,77.7 358.0,72.0 409.3,85.3 460.7,70.1 512.0,66.3 563.3,66.3 614.7,75.8 666.0,70.1" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+<circle cx="50.0" cy="167.0" r="3" fill="#2563eb"/>
+<circle cx="101.3" cy="136.6" r="3" fill="#2563eb"/>
+<circle cx="152.7" cy="98.6" r="3" fill="#2563eb"/>
+<circle cx="204.0" cy="89.1" r="3" fill="#2563eb"/>
+<circle cx="255.3" cy="106.2" r="3" fill="#2563eb"/>
+<circle cx="306.7" cy="77.7" r="3" fill="#2563eb"/>
+<circle cx="358.0" cy="72.0" r="3" fill="#2563eb"/>
+<circle cx="409.3" cy="85.3" r="3" fill="#2563eb"/>
+<circle cx="460.7" cy="70.1" r="3" fill="#2563eb"/>
+<circle cx="512.0" cy="66.3" r="3" fill="#2563eb"/>
+<circle cx="563.3" cy="66.3" r="3" fill="#2563eb"/>
+<circle cx="614.7" cy="75.8" r="3" fill="#2563eb"/>
+<circle cx="666.0" cy="70.1" r="3" fill="#2563eb"/>
+<line x1="60" y1="16" x2="88" y2="16" stroke="#2563eb" stroke-width="2.5"/><text x="94" y="20" font-size="12" fill="#374151">起点：SFT-180 适配器（35%）</text>
+<line x1="300" y1="16" x2="328" y2="16" stroke="#9ca3af" stroke-width="2.5"/><text x="334" y="20" font-size="12" fill="#374151">起点：只加屏蔽（26%）</text>
+</svg>
+<figcaption>RL 训练过程中的可用率。两条曲线分别是两个起点：SFT 适配器（蓝）与只加屏蔽的模型（灰）。完整数据见下方折叠表。</figcaption>
+</figure>
+
+<details>
+<summary>展示每一步的数字</summary>
+<table>
+  <tr><th>RL 步数</th><th class="num">加屏蔽的模型</th><th class="num">SFT 适配器</th></tr>
+  <tr><td>0</td><td class="num">26%（19 到 33%）</td><td class="num">35%（27 到 43.5%）</td></tr>
+  <tr><td>25</td><td class="num">28%（20.5 到 36%）</td><td class="num">43%（34 到 52.5%）</td></tr>
+  <tr><td>50</td><td class="num">34%（25.5 到 43%）</td><td class="num">53%（44.5 到 62%）</td></tr>
+  <tr><td>75</td><td class="num">39.5%（31 到 48.5%）</td><td class="num">55.5%（47 到 64.5%）</td></tr>
+  <tr><td>100</td><td class="num">44%（35.5 到 53%）</td><td class="num">51%（42 到 60%）</td></tr>
+  <tr><td>125</td><td class="num">44%（34 到 53%）</td><td class="num">58.5%（50 到 68%）</td></tr>
+  <tr><td>150</td><td class="num">35%（26.5 到 44%）</td><td class="num">60%（52 到 68%）</td></tr>
+  <tr><td>175</td><td class="num">38%（29 到 48%）</td><td class="num">56.5%（47.5 到 65.5%）</td></tr>
+  <tr><td>200</td><td class="num">39%（30 到 47%）</td><td class="num">60.5%（52 到 70%）</td></tr>
+  <tr><td>225</td><td class="num">36.5%（28 到 45%）</td><td class="num">61.5%（53 到 70%）</td></tr>
+  <tr><td>250</td><td class="num">40%（32 到 48%）</td><td class="num">61.5%（53.5 到 69.5%）</td></tr>
+  <tr><td>275</td><td class="num">40%（31.5 到 48%）</td><td class="num">59%（50 到 68%）</td></tr>
+  <tr><td>300</td><td class="num">43%（34.5 到 51.5%）</td><td class="num">60.5%（51 到 69.5%）</td></tr>
+</table>
+</details>
+
+<p>SFT 适配器是更好的起点：它起步高 9 个百分点，最后挣得也更多——SFT 数据带来的好处留下来了。两次训练的主要收益都在第 125 步前后拿到，之后基本走平。</p>
+
+<p>落到具体问题上是什么样子？大多数回答变好了，但也有些可疑地变短：</p>
+
+<blockquote>
+  <p><strong>提问：What is the movie Forrest Gump about（电影《阿甘正传》讲的是什么？）</strong></p>
+  <p><strong>RL 之前（SFT 适配器）：</strong></p>
+  <div class="en">For a long long long long long long long long long…</div>
+  <div class="zh">"很长很长很长很长……"——一路重复到 300 词元的上限。连贯性 1，切题性 1。</div>
+</blockquote>
+
+<blockquote>
+  <p><strong>RL 训练 300 步之后：</strong></p>
+  <div class="en">For a man with a low IQ, his story follows a happy path and a grand story of war and a family.</div>
+  <div class="zh">讲的是一个智商不高的男人，他的故事走在一条快乐的道路上，其中有战争、有家庭，也有宏大的际遇。连贯性 3，切题性 4。</div>
+</blockquote>
+
+<p>留意有些回答变得非常短。在原文的交互区域里点开"车站""棒球""陈词滥调"这三道题就能看到："SNCF"（法国铁路公司）和"football"（足球）各只回答了一个词。"Football"只答对了问题的一半，"陈词滥调"那则干脆没回答，可它们都拿了 5 分的连贯性。（这三条在原文里是交互示例，本译文只作文字转述。）</p>
+
+<p>把几种设置放在一起，比较回答的长度和可用率：</p>
+
+<table>
+  <tr><th></th><th class="num">回答长度中位数（词元）</th><th class="num">平均长度（词元）</th><th class="num">可用率</th></tr>
+  <tr><td>加屏蔽，RL 之前</td><td class="num">52</td><td class="num">92</td><td class="num">26%</td></tr>
+  <tr><td>加屏蔽，300 步之后</td><td class="num">18</td><td class="num">42</td><td class="num">43%</td></tr>
+  <tr><td>SFT 适配器，RL 之前</td><td class="num">53</td><td class="num">70</td><td class="num">35%</td></tr>
+  <tr><td>SFT 适配器，300 步之后</td><td class="num">24</td><td class="num">40</td><td class="num">60.5%</td></tr>
+</table>
+
+<p>那么，提升是不是仅仅因为"答案变短了"？</p>
+
+<p><strong>对加屏蔽的模型来说，基本是的。</strong>提升全部来自连贯性——这恰恰是短回答最容易拿到的分——在"答到点上"这一项上没有任何长进。"干净但漏答了半题"的回答从 24 个涨到了 66 个（共 200 个）。原因多半出在奖励的设计上：它把两项分数直接相加，于是（连贯性 5 + 切题 3）和（4 + 4）拿到同样的奖励，尽管只有（4, 4）才算可用。这样，"写短、写干净、只答一半"就成了模型最稳妥的策略。</p>
+
+<p><strong>对 SFT 适配器来说，不是。</strong>它的两项分数都涨了，而且在每种回答长度上可用率都在上升。所以它的提升不能只用"变短了"来解释。</p>
+
+<p>那回答到底为什么会缩水？我分别测试了两种修法，各自从 SFT 适配器出发跑 150 步，其余设置完全一样：</p>
+<ul>
+  <li><strong>改用两项分数中较低的那个当奖励</strong>——这样"干净但只答一半"（5, 3）的奖励就会低于"可用"（4, 4）。</li>
+  <li><strong>取消损失函数里对短回答的偏爱</strong>——GRPO 默认把每个回答的损失除以它自身的长度，短回答因此每个词分到的"推力"更大。改成统一除以 300 词元的上限，这个偏爱就消失了。</li>
+</ul>
+
+<p>两种修法都没提高可用率，也没能阻止回答继续变短：到第 150 步，两种修法的回答中位数分别是 30 和 38 个词元，对照原始训练的 33 个、以及 RL 之前的 53 个。也就是说，缩水主要不是奖励或损失写法造成的。开了屏蔽之后，多写一个词就多一次"被迫用怪词"的风险，短回答<em>天然</em>更容易得高分。</p>
+
+<p>那么，最后事情到了哪一步？一开始，加屏蔽的模型大约每 4 个回答里只有 1 个可用。经过 180 条无 e 例句的 SFT 和 300 步 RL 之后，大约是每 10 个里有 6 个。而且对 SFT 适配器来说，我专门检验过，这份提升并不是"因为写得少了"才拿到的。它有时候仍然会偷懒（见前面的"football"），但和当初那句"riddiculous"相比，它已经非常接近那个干净利落的土拨鼠答案了。</p>
+
+<p>下面是评测集中每个回答在各个阶段的结果。原文是一张交互散点图，把鼠标悬停或点在每个圆点上就能读那则回答；本页以摘要代替，完整交互版见<a href="https://kevin-wu.ca/blog/qwn/">原文</a>。</p>
+
+<div class="stats">
+  <div class="stat"><div class="big bad">0 / 200</div><div class="cap">不加屏蔽<br>可用数</div></div>
+  <div class="stat"><div class="big mid">52 / 200</div><div class="cap">加屏蔽<br>可用数</div></div>
+  <div class="stat"><div class="big ok">121 / 200</div><div class="cap">SFT 适配器 + RL 300 步<br>可用数</div></div>
+</div>
+
+<p class="small">每个数据点是一则回答：50 道评测题 × 每题 4 条。"可用"= 不含 e，且评审给出的连贯性、切题性都 ≥ 4。原图图例：绿色为可用；灰色为某一项评分低于 4；红色为含 e。</p>
+
+<h2 id="takeaways">经验与下一步</h2>
+
+<p>关于这个项目本身：</p>
+<ul>
+  <li><strong>"去掉 e"和"把文章写好"是两个独立的问题。</strong>屏蔽不用训练就能去掉所有 e；真正的难题——也是 SFT 和 RL 全部力气的去处——是用剩下能用的词把话说明白。</li>
+  <li><strong>跟任务对口的数据，价值远高于更多不对口的数据。</strong>90 条手写的应答例句，胜过体量相当的一整本无 e 小说（31.5% 对约 26%）。</li>
+</ul>
+
+<p>关于做事方法：</p>
+<ul>
+  <li><strong>尽早定义目标。</strong>在定下"可用率"这个指标之前，这个项目只是在东摸西摸地玩 LLM 微调，感觉使不上劲。</li>
+  <li><strong>按冲刺推进。</strong>中途我要同时应付学业、面试准备和项目，很难每天深入思考方向。后来改成"定一个里程碑、做完再停"的工作方式，比每天凿一小块顺利得多。</li>
+  <li><strong>真的去读输出。</strong>损失和奖励只是数字，数字看起来一切正常时，输出可能已经烂掉了（见附录里的"一长串字母"）。把训练过程和模型的回答记录下来，才能确认训练在往有用的方向走。</li>
+</ul>
+
+<p>还有提升空间，特别是做更细致的实验、设计一个不鼓励"答一半"的奖励。不过我对学到的东西和最终结果都很满意，接下来想把时间花到别的方向：</p>
+<ul>
+  <li>补强强化学习的基础：了解背后的数学框架，多实现几个常见算法、吃透它们的思路；以后也想试试把 RL 用到游戏上……</li>
+  <li>跟进模型/智能体方向更新的 post-training（模型训后处理）工作：下一个给 LLM 做 RL 的项目，大概率会用现成的框架和 API、买算力来跑更大的实验。</li>
+</ul>
+
+<h2 id="refs">参考与延伸阅读</h2>
+<ul>
+  <li><a href="https://surya.website/rling-qwen-to-paint-with-code">启发文中的"教模型画花"原始博客</a></li>
+  <li><a href="https://arxiv.org/html/2505.20501v1">用 LLM 做漏字文改写的论文</a>（arXiv:2505.20501）</li>
+  <li><a href="https://coreyhanson.com/blog/a-simple-way-to-program-an-llm-lipogram/">给 Llama-8B 屏蔽字母 e 的简单做法（博客）</a></li>
+</ul>
+
+<h2 id="appendix">附录</h2>
+
+<h3 id="timeline">项目时间线</h3>
+<p>项目的过程大致如下（加粗部分是本博客覆盖的内容）：</p>
+<ul>
+  <li>确定项目范围、选择模型、做前期阅读</li>
+  <li>手写前向传播（forward pass，即把输入完整算到输出的全过程），加上各项优化（见<a href="#memory">显存部分</a>）</li>
+  <li><strong>直接尝试让模型输出不含 e 的回答</strong>（对基座模型做"不用 e"的 RL、试屏蔽）</li>
+  <li><strong>定义目标</strong>（微调后我想看到什么？需要什么样的数据？）</li>
+  <li>自己动手实现 `TRL` 库里的 `Trainer` 类那一套东西（见 GitHub 仓库里的“Engine”类）</li>
+  <li><strong>SFT 尝试</strong></li>
+  <li><strong>为连贯性做 RL</strong></li>
+  <li>收尾整理 + 写这篇博客</li>
+</ul>
+
+<h3 id="repo">代码仓库</h3>
+<p>代码、数据和结果都在 <a href="https://github.com/kevinyvv/qwen-3-1.7b-finetune-proj">kevinyvv/qwen-3-1.7b-finetune-proj</a>。其中比较有意思的部分：</p>
+<ul>
+  <li><a href="https://github.com/kevinyvv/qwen-3-1.7b-finetune-proj/blob/main/core/model.py">手写的 Qwen3 前向传播</a></li>
+  <li><a href="https://github.com/kevinyvv/qwen-3-1.7b-finetune-proj/blob/main/train_loop/simple_train.py"><code>simple_train.py</code></a>（第一次的尝试）</li>
+  <li><a href="https://github.com/kevinyvv/qwen-3-1.7b-finetune-proj/blob/main/training/sft/sft.py">SFTEngine</a>、<a href="https://github.com/kevinyvv/qwen-3-1.7b-finetune-proj/blob/main/training/rl/reinforce.py">RLEngine（REINFORCE）</a>、<a href="https://github.com/kevinyvv/qwen-3-1.7b-finetune-proj/blob/main/training/rl/grpo.py">GRPOEngine</a></li>
+  <li><a href="https://github.com/kevinyvv/qwen-3-1.7b-finetune-proj/blob/main/core/judge.py">评审模型</a>，以及用于 SFT 的<a href="https://github.com/kevinyvv/qwen-3-1.7b-finetune-proj/blob/main/data/rewrites/verified_200_20261015.jsonl">无 e 例句</a></li>
+  <li>结果与发现：<a href="https://github.com/kevinyvv/qwen-3-1.7b-finetune-proj/tree/main/runs">运行记录</a>和<a href="https://github.com/kevinyvv/qwen-3-1.7b-finetune-proj/blob/main/docs/experiment_history.md">完整实验笔记</a></li>
+</ul>
+
+<h3 id="adapters">Hugging Face 上的适配器</h3>
+<p>两个适配器都在 Hugging Face 上，可以用 `peft` 加载到 Qwen3-1.7B 上：</p>
+<ul>
+  <li><a href="https://huggingface.co/k33wu/qwen3-1.7b-no-e">k33wu/qwen3-1.7b-no-e</a>（最终版：SFT 之后接 RL）</li>
+  <li><a href="https://huggingface.co/k33wu/qwen3-1.7b-no-e-sft180">k33wu/qwen3-1.7b-no-e-sft180</a>（仅 SFT）</li>
+</ul>
+<p>它们仍需配合屏蔽才能保证不含 e，模型卡里附了带屏蔽运行的代码。</p>
+
+<h3 id="model">模型的挑选</h3>
+<p>我选 Qwen3-1.7B，是因为 16 GB 显存就能在本地微调它。它的架构也比更新的模型简单，更便于理解和手写前向传播。</p>
+
+<p>除此之外，我做过的唯一"预研"，就是学会怎样挑一个本地跑得动的模型。细节默认折叠，如果你好奇显存是怎么算的，欢迎继续往下看。</p>
+
+<details id="memory">
+<summary>显存计算与优化</summary>
+
+<p>训练的显存开销来自五处：模型权重、梯度、优化器状态、保存下来的激活值（activation，前向计算中要留着供反向传播用的中间结果），以及 logits（模型做 softmax 之前、对词表里每个词元打出的原始分数）这类大的临时张量。只要知道模型结构、张量的数据类型和训练实现，就能估算出所需显存。</p>
+
+<p>每一块的粗估办法：</p>
+<ol>
+  <li>基础权重 → 参数量 × 每个参数的字节数</li>
+  <li>梯度 → 可训练参数量 × 每个参数的字节数</li>
+  <li>优化器状态 → 可训练参数量 × 每个参数的字节数 × 优化器状态份数</li>
+  <li>激活值 → 批大小 × 序列长度 × 隐藏维度 ×（每个张量的字节数）×（每层张量数）× 层数</li>
+  <li>logits → 批大小 × 序列长度 × 词表大小 ×（每个 logit 的字节数）</li>
+</ol>
+
+<p>给一个 2B 参数、bf16 权重、批大小 4、序列长度 2048、词表 15 万、优化器用 AdamW（状态张量为 FP32）的模型算一笔"餐巾纸账"：</p>
+
+<table>
+  <tr><th>项目</th><th class="num">粗估</th></tr>
+  <tr><td>模型权重：2B 参数 × 2 字节</td><td class="num">4 GB</td></tr>
+  <tr><td>梯度：2B 参数 × 2 字节</td><td class="num">4 GB</td></tr>
+  <tr><td>AdamW 状态：2B 参数 × 2 份 × 4 字节</td><td class="num">16 GB</td></tr>
+  <tr><td>激活值：4 × 2048 × 2048 × 2 字节 × 12 × 28</td><td class="num">11.3 GB</td></tr>
+  <tr><td>logits：4 × 2048 × 150k × 2 字节</td><td class="num">2.46 GB</td></tr>
+  <tr><td><strong>合计</strong></td><td class="num"><strong>37.7 GB</strong></td></tr>
+</table>
+
+<p>再留 1 到 2 GB 余量，大约要 40 GB 显存。这还只是偏乐观的估计：</p>
+<ul>
+  <li>混合精度训练通常会额外留一份 fp32 的主权重（再加 8 GB）。</li>
+  <li>计算损失时 logits 常常要转成 fp32，这一项还得翻倍。</li>
+</ul>
+
+<p>那怎么塞进 16 GB 显存？三个优化能把五项中的四项压到几乎为零，只留下基础权重这个大头。</p>
+
+<p><strong>LoRA → 把梯度和优化器状态压小。</strong>LoRA 冻结原始权重，只训练一个"更新量"，把它写成两个低秩矩阵的乘积 ΔW = B·A。只有 A 和 B 需要梯度和优化器状态。</p>
+<ul>
+  <li>对一个 2048×2048 的矩阵，秩取 16：完整矩阵约 420 万参数，A 和 B 加起来只有 2 × 2048 × 16 ≈ 6.5 万，<strong>少了 64 倍</strong>。</li>
+  <li>放到整个模型里，LoRA 一般只训练约 1% 的参数，这里约合 2,000 万。它们的梯度和优化器状态只要约 0.25 GB。</li>
+</ul>
+<p>注意 LoRA 并不压缩被冻结的基础权重本身；QLoRA 可以，做法是把基础权重存成 4-bit，把 4 GB 压到约 1 GB。</p>
+
+<p><strong>梯度检查点 → 把激活值压小。</strong>通常前向传播的每层中间结果都要留到反向传播再用。改用梯度检查点后：</p>
+<ul>
+  <li>只保留每层的<em>输入</em>，中间的扔掉；</li>
+  <li>反向传播时，把那一层的前向计算重新跑一遍再生成中间结果。</li>
+</ul>
+<p>在这里，这意味着只存 28 层的层输入（约 0.9 GB），外加同一时刻一层的中间结果（约 0.4 GB）——<strong>用约 1.3 GB 顶掉了约 11.3 GB</strong>。代价是多跑一次前向传播，训练一般会慢 20% 到 30%。</p>
+
+<p><strong>融合 / 分块交叉熵 → 把 logits 压小。</strong>像 Liger Kernel、Cut Cross-Entropy 这样的实现把损失分块计算。完整的"批 × 序列 × 词表"大张量一次都不会存在，每次只生成一小块，这一项最多降到几百 MB。</p>
+
+<p>这些优化做完之后，显存需求降到约 7 到 8 GB（含 CUDA 自身开销）。剩下的显存可以拿去换更大的批大小或更长的序列。</p>
+</details>
+
+<h3 id="dataset">数据集的来源与构建</h3>
+<p>用到的数据集：<a href="https://huggingface.co/datasets/HuggingFaceH4/no_robots">No Robots</a>、<a href="https://huggingface.co/datasets/databricks/databricks-dolly-15k">Databricks-Dolly</a>。</p>
+
+<p>我剔除了：写代码的请求、空样本、重复的问题、超过 150 词的问题，以及人类参考答案超过 300 词的样本。No Robots 里"角色扮演"式的对话我也删了——"押韵地回答"这类附加指令会和"不用 e"叠加出第二种约束。</p>
+
+<p>过滤、重新划分之后得到（这些题目大多最终没用上）：</p>
+<table>
+  <tr><th>划分</th><th class="num">问题数</th></tr>
+  <tr><td>训练</td><td class="num">18,000</td></tr>
+  <tr><td>验证</td><td class="num">200</td></tr>
+  <tr><td>测试</td><td class="num">500</td></tr>
+</table>
+
+<p>我还发现了另一个问题：有些问题就是没法不用 e 回答。"比利时的首都是哪里？"离不开 "Brussels"（布鲁塞尔），"谁画了《蒙娜丽莎》？"离不开 "Leonardo"（莱奥纳多）。凡用于训练和测试的问题，我都把这类筛掉了。</p>
+
+<p>各个实验需要数据时，我是从这些划分里抽样，而不是整块拿去用。评测集是从验证划分里抽的 50 个问题。RL 的问题池最初是从训练划分抽的 2,000 个，再由智能体子任务（subagents，即用 AI 分头过滤的自动化流程）筛到 1,235 个。</p>
+
+<h3 id="judge-fair">让评审保持公平</h3>
+<p>有两条规则保证评审的公正：</p>
+<ul>
+  <li><strong>不告诉评审"e"规则的存在</strong>，免得它因为"这任务太难了"而对奇怪的回答网开一面。</li>
+  <li><strong>事实错误不扣分</strong>，只要它认真试着回答。1.7B 的模型本来就会答错很多事实，而这里我只关心"写得好不好"。</li>
+</ul>
+
+<p>我也检查了评审是不是过于苛刻：去掉"e"规则、让 Qwen 正常作答，然后只按连贯性和切题性打分——正常回答理应大多数都能通过，我的预期是超过 80%，结果 Qwen 得到 80.5%，说明评审的尺度合理。期间我几次调整评审的提示词，让它能抓住常见问题（重复成段的句子、被词元上限截断的回答）。评审的代码链接在<a href="#repo">「代码仓库」</a>一节。</p>
+
+<h3 id="rl-no-e">为了不用 e 而做 RL（早期尝试）</h3>
+<p>第一步是：让模型学会"有意识地"生成不含 e 词元的回答（而不是碰巧）。写完前向传播、加上 LoRA 之后，我冻结原始权重、只训练适配器。用同一条问题的 8 个副本，关闭思考模式，最多生成 64 个词元：</p>
+<blockquote><p>Prompt: respond without using the letter 'e'（请用不含字母 e 的英文回答）</p></blockquote>
+<p>想法是先在这一条例句上过拟合，暂时不管数据集和泛化：生成回答、打分、按分数更新模型。躲开一个字母，能有多难？</p>
+
+<p>我最初给每个不含 e 的单词记 1 分。问题是：只要答案里混着一些有效单词，破了规则也照样拿分。我试过在整批样本里减去奖励均值，让更好的回答占便宜，但采样出来的东西往往彼此雷同。我也想要更具体的信号，指出到底是回答的哪一段出了问题。</p>
+
+<p>于是改成一张"逐词元"的奖励查找表：</p>
+<pre><code>for tok, idx in tok_to_id.items():
+    if 'e' in tok.lower() and tok != eos_token:
+        e_table[idx] = -1.
+    else:
+        e_table[idx] = 0.5</code></pre>
+
+<p>可词元并不等于完整的单词。像 gr + een 这样的切分，只罚后面的词元，就漏掉了造成这个词的前一次选择。于是我给奖励加上了"未来折扣"，让后面的惩罚也能回头影响前面的选择。下面是<a href="https://github.com/kevinyvv/qwen-3-1.7b-finetune-proj/blob/21dcbfa9d403e42529013e811eb1e06b18ba0e06/train_loop/simple_train.py#L20-L33">回报计算</a>和<a href="https://github.com/kevinyvv/qwen-3-1.7b-finetune-proj/blob/21dcbfa9d403e42529013e811eb1e06b18ba0e06/train_loop/simple_train.py#L138-L142">策略损失</a>两段代码的节选：</p>
+<pre><code># discount() 内部，从回答的最后一个词元往前算：
+for t in reversed(range(rewards.size(1))):
+    running = rewards[:, t] + gamma * running
+    returns[:, t] = running
+
+# 回到训练循环里：
+rewards = get_feedback(gen_ids, e_table)
+per_token_reward = discount(rewards)
+advantage = (per_token_reward - per_token_reward[mask].mean()) * mask
+loss = -(log_probs * advantage).sum()</code></pre>
+
+<p>减去均值后，每个词元得到的就是一个相对整批样本的"优势"（advantage）。优势为正就提高那个词元的概率，为负就压低。</p>
+
+<p>这招"有点用"。有些输出稳定在了 "i want to know what you want to know"（我想知道你想知道什么）——确实守着规则，但这算什么回答呢。还有的样本找到了更省力的得分方式（节选）：</p>
+<blockquote><div class="en">i m k t r n l d g h j z p q w x y f v b c …</div></blockquote>
+<p>我奖励的是"不带 e 的词元"，而一串辅音字母不组成任何词，也能把分拿满。奖励数值换了几套写法，结果差不多——这些规则都没有直接衡量"回答像不像话"。</p>
+
+<p>下一个想法是用 KL 惩罚（一种"离原模型越远、罚得越多"的约束）来阻止跑偏：把同一串生成结果喂给关掉 LoRA 的同一个模型，比较它对采样词元给出的概率，再把这项调整加进奖励：</p>
+<pre><code>kl_approx = (log_probs.detach() - ref_gen_log_probs) * mask
+rewards = get_feedback(gen_ids, e_table) - kl_beta * kl_approx</code></pre>
+
+<p>本意是希望模型别把原来的语言能力丢掉，可输出还是一样在崩。后来才明白，KL 的权重相对其他奖励实在太小。有一条存下来的样本是：</p>
+<blockquote><div class="en">Tst, tkt, nkt, tkt, nkt, tkt.</div></blockquote>
+
+<p>我又试了更小的奖励、按词元长度缩放的奖励、更重的 e 惩罚、不同的折扣因子。有的跑出一堆乱码，有的卡在同一条句子上反复输出；而一开始就上重惩罚的，则直接输出单字母和换行。</p>
+
+<p>这轮最初的尝试让我意识到：真的要去读样本。这些运行说明，奖励函数太容易被"钻空子"（reward gaming），而且堵上一个口子，它会从别处冒出来。</p>
+
+<h3 id="sizes">1.7B 与 4B 的对比</h3>
+<p>有一段时间，我猜问题出在 1.7B 实在太小。我还对比过 Qwen3-1.7B 和 4B，想验证当初是不是该直接选大模型。在评测集上的结果：</p>
+
+<table>
+  <tr><th>设置</th><th class="num">1.7B</th><th class="num">4B</th></tr>
+  <tr><td>不开屏蔽，只按连贯性、切题性评判（基准）</td><td class="num">80.5%</td><td class="num">87.5%</td></tr>
+  <tr><td>告知不要用 e，不开屏蔽</td><td class="num">0%</td><td class="num">0%</td></tr>
+  <tr><td>告知不要用 e，开屏蔽</td><td class="num"><strong>26%</strong></td><td class="num"><strong>12.5%</strong></td></tr>
+</table>
+
+<p>两个模型都没法只靠指令遵守规则：没有一个回答躲开了 e，所以屏蔽无论如何都得开。更意外的是，开了屏蔽之后 4B 反而更差：它照写自己原本计划写的词，然后把 e 抠掉，于是写出 "th"（the 去掉 e）或者 "amusrmt park"（amusement park 去掉 e）；1.7B 倒更愿意换掉整个词。</p>
+
+<p>所以实验继续留在 1.7B 上做。需要说明：这只是同一个模型家族里两个尺寸的对比——恰好是我能本地跑起来的两个。更新的模型，或者英文训练语料更多的模型，可能会做得更好。</p>
+
+<footer>
+  <p>原文：<a href="https://kevin-wu.ca/blog/qwn/">Qwen, Minus the E</a> · 作者 <a href="https://kevin-wu.ca/">Kevin Wu</a>（<a href="https://x.com/kwu4578">Twitter</a> · <a href="https://linkedin.com/in/wuyukun">LinkedIn</a> · <a href="https://github.com/kevinyvv">GitHub</a>）· 2026 年 10 月</p>
+  <p>中文翻译：CodingPracticeGroup/qwen-3-1.7b-finetune-proj 的 gh-pages 分支，译于 2026-11-11，仅供学习交流；如涉版权或使用问题，请联系原作者。</p>
+</footer>
+
+</div>
+</body>
+</html>
