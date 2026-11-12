@@ -20,6 +20,6 @@
 三张配图在页面中保持英文标注和原有交互，图前均附有“原图取自原文页面”的中文说明。
 正文中的其他英文例句（涉及字母 e 的双关）保留英文原文并附中文释义，与配图无关。
 
-访问地址：`https://codingpracticegroup.github.io/qwen-3-1.7b-finetune-proj/`
+访问地址：[https://codingpracticegroup.github.io/qwen-3-1.7b-finetune-proj/](https://codingpracticegroup.github.io/qwen-3-1.7b-finetune-proj/)
 
 本翻译仅供学习交流；配图组件与数据版权归原文作者。
