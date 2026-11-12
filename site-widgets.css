@@ -42,7 +42,7 @@
   font-weight: 600;
   line-height: 1.4;
 }
-.post .dots-count{
+.dots-count{
   margin-bottom: 0.5em;
   color: var(--muted);
   font-size: 0.85em;
@@ -79,7 +79,7 @@
   stroke: var(--text);
   stroke-width: 1.3;
 }
-.post .dots-key{
+.dots-key{
   display: flex;
   flex-wrap: wrap;
   gap: 0.2em 1.25em;
@@ -89,7 +89,7 @@
   color: var(--muted);
   font-size: 0.85em;
 }
-.post .dots-key li{
+.dots-key li{
   display: flex;
   align-items: center;
   gap: 0.45em;
@@ -116,8 +116,8 @@
 .dots-status{
   font-weight: 600;
 }
-.post .dots-prompt,
-.post .dots-answer{
+.dots-prompt,
+.dots-answer{
   margin-top: 0.3em;
 }
 .dots-prompt{
@@ -150,7 +150,7 @@
   padding: 0;
   font-size: 0.85em;
 }
-.post .chart-legend li + li{
+.chart-legend li + li{
   margin-top: 0;
 }
 .chart-legend li{
