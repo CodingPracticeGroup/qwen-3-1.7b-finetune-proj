@@ -1,0 +1,332 @@
+/* excerpt of kevin-wu.ca styles.css, chart/dots/diagram components only */
+.visually-hidden{
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.compare,
+.chat,
+.dots,
+.chart,
+.diagram{
+  --good: #12a195;
+  --good-text: #008479;
+  --bad: #dd6d45;
+  --bad-text: #b74b21;
+  --baseline: #d39410;
+  --neutral: #b6b1a0;
+  --cream: #fbf4e6;
+  --grid: #eceae1;
+  --rule: #d4d1c4;
+  
+  --ask: #f9eddd;
+  --ask-hover: #f2e2d0;
+  --reply: #f5f3ef;
+}
+.dots{
+  margin: 0 0 var(--flow);
+}
+.dots-grids{
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  
+  align-items: end;
+  gap: 1.5em;
+}
+.dots-title{
+  font-size: 0.85em;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.post .dots-count{
+  margin-bottom: 0.5em;
+  color: var(--muted);
+  font-size: 0.85em;
+}
+.dots-count strong{
+  color: var(--text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.dots-grid svg{
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.dots-grid svg:focus-visible{
+  outline: 2px solid var(--text);
+  outline-offset: 4px;
+}
+.dots .dot-ok{
+  fill: var(--good);
+}
+.dots .dot-judge{
+  fill: var(--cream);
+  stroke: var(--neutral);
+}
+.dots .dot-e{
+  fill: var(--bad);
+}
+.dots .dot-ring{
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1.3;
+}
+.post .dots-key{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2em 1.25em;
+  margin: 0.9em 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.85em;
+}
+.post .dots-key li{
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  margin: 0;
+}
+.dots-key svg{
+  flex: none;
+  width: 0.8em;
+  height: 0.8em;
+}
+.dots-tip{
+  position: absolute;
+  z-index: 2;
+  width: min(21em, 100%);
+  padding: 0.5em 0.7em;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.08);
+  font-size: 0.85em;
+  line-height: 1.5;
+  pointer-events: none;
+}
+.dots-status{
+  font-weight: 600;
+}
+.post .dots-prompt,
+.post .dots-answer{
+  margin-top: 0.3em;
+}
+.dots-prompt{
+  color: var(--muted);
+}
+.dots-answer .e{
+  color: var(--bad-text);
+  font-weight: 600;
+}
+.dots figcaption{
+  margin-top: 0.6em;
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.45;
+}
+.chart{
+  --series-1: var(--good);
+  --series-2: var(--baseline);
+  margin: 0 0 1.5em;
+}
+.chart-title{
+  font-weight: 600;
+}
+.chart .chart-legend{
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35em 1.25em;
+  margin: 0.6em 0 0.25em;
+  padding: 0;
+  font-size: 0.85em;
+}
+.post .chart-legend li + li{
+  margin-top: 0;
+}
+.chart-legend li{
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.chart .key{
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1em;
+  height: 2px;
+  border-radius: 1px;
+}
+.chart .key.s1{
+  background: var(--series-1);
+}
+.chart .key.s2{
+  background: var(--series-2);
+}
+.chart-plot{
+  position: relative;
+  outline-offset: 4px;
+}
+.chart-plot:focus-visible{
+  outline: 2px solid var(--text);
+}
+.chart-plot svg{
+  display: block;
+  overflow: visible;
+}
+.chart svg text{
+  font-size: 0.85em;
+  fill: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.chart .grid{
+  stroke: var(--grid);
+}
+.chart .axis,
+.chart .marker-line{
+  stroke: var(--rule);
+}
+.chart .band{
+  fill-opacity: 0.1;
+}
+.chart .line{
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.chart .dot{
+  stroke: #ffffff;
+  stroke-width: 2;
+}
+.chart .band.s1,
+.chart .dot.s1{
+  fill: var(--series-1);
+}
+.chart .band.s2,
+.chart .dot.s2{
+  fill: var(--series-2);
+}
+.chart .line.s1{
+  stroke: var(--series-1);
+}
+.chart .line.s2{
+  stroke: var(--series-2);
+}
+.chart svg .end-value{
+  fill: var(--text);
+  font-weight: 600;
+}
+.chart .cross-line{
+  stroke: var(--muted);
+}
+.chart-tooltip{
+  position: absolute;
+  pointer-events: none;
+  background: #ffffff;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0.45em 0.7em;
+  font-size: 0.85em;
+  line-height: 1.5;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.08);
+}
+.tip-step{
+  color: var(--muted);
+}
+.tip-row{
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.tip-row strong{
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 3.2em;
+}
+.tip-range{
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.chart-table{
+  margin-top: 0.75em;
+}
+.chart-table summary{
+  font-size: 0.85em;
+}
+.diagram{
+  margin: 0 0 var(--flow);
+}
+.diagram-scroll{
+  overflow-x: auto;
+}
+.diagram svg{
+  display: block;
+  width: 100%;
+  min-width: 34em;
+  height: auto;
+}
+.diagram svg text{
+  font-size: 11.5px;
+  fill: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.diagram svg .muted{
+  fill: var(--muted);
+}
+.diagram svg .strong{
+  font-weight: 600;
+}
+.diagram svg .tok{
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.diagram svg .good{
+  fill: var(--good-text);
+}
+.diagram svg .bad{
+  fill: var(--bad-text);
+}
+.diagram .box{
+  fill: var(--cream);
+}
+.diagram .arrow{
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.25;
+}
+.diagram .rule{
+  stroke: var(--rule);
+}
+.diagram .grid{
+  stroke: var(--grid);
+}
+.diagram .average{
+  stroke: var(--text);
+  stroke-dasharray: 4 3;
+}
+.diagram .bar-good{
+  fill: var(--good);
+}
+.diagram .bar-bad{
+  fill: var(--bad);
+}
+.diagram figcaption{
+  margin-top: 0.6em;
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.45;
+}
+@media (max-width: 40rem) {
+.dots-grids{
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.1em;
+  }}

@@ -57,6 +57,7 @@
   .small{font-size:.9em;color:var(--muted)}
   @media (max-width:560px){.stats{grid-template-columns:1fr}}
 </style>
+<link rel="stylesheet" href="./site-widgets.css" />
 </head>
 <body>
 <div class="wrap">
@@ -69,7 +70,7 @@
 </header>
 
 <div class="tn">
-  <p><strong>译者说明</strong>：本页是 Kevin Wu 英文博客 <em>Qwen, Minus the E</em>（kevin-wu.ca，2026 年 10 月版）的简体中文全文翻译，逐节对应原文，数字、表格、代码与链接均与原文一致；英文例句保留原文并附中文释义，因为这篇博客讲的就是"字母 e"本身。原文中的几张可交互图表（比如把鼠标移到点上就能读全文的散点图），这里改用静态图表或数据表呈现，并注明出处，交互版请移步<a href="https://kevin-wu.ca/blog/qwn/">原文</a>。为便于阅读，专业术语在首次出现时用括号简要解释。本翻译仅供学习交流。翻译完成于 2026-11-11。</p>
+  <p><strong>译者说明</strong>：本页是 Kevin Wu 英文博客 <em>Qwen, Minus the E</em>（kevin-wu.ca，2026 年 10 月版）的简体中文全文翻译，逐节对应原文，数字、表格、代码与链接均与原文一致；英文例句保留原文并附中文释义，因为这篇博客讲的就是"字母 e"本身。原文中的三张配图（组内奖励示意图、RL 训练曲线、评测散点图）均按原样嵌入了原文页面的组件：图形、英文标注和交互行为保持原样，未翻译、未重绘，每张图前附一句中文说明。相关 HTML/CSS/JS 与数据文件均取自 kevin-wu.ca 原页面。为便于阅读，专业术语在首次出现时用括号简要解释。本翻译仅供学习交流。翻译完成于 2026-11-11。</p>
 </div>
 
 <nav class="toc">
@@ -244,38 +245,63 @@ That it brings us all into its calm.</div>
 
 <p>为了说明第 5 步的打分方式，看一个真实小组的例子：</p>
 
-<figure>
-<svg viewBox="0 0 680 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="同一组 8 个回答的组内调整奖励柱状图" style="width:100%;height:auto;font-family:system-ui,-apple-system,'Segoe UI',sans-serif">
-<line x1="45" y1="150" x2="635" y2="150" stroke="#9ca3af" stroke-width="1"/>
-<rect x="55" y="73.0" width="52" height="77.0" fill="#2563eb" rx="2"/>
-<text x="81.0" y="67.0" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">+1.4</text>
-<text x="81.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(5, 5)</text>
-<rect x="129" y="100.5" width="52" height="49.5" fill="#2563eb" rx="2"/>
-<text x="155.0" y="94.5" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">+0.9</text>
-<text x="155.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(5, 4)</text>
-<rect x="203" y="100.5" width="52" height="49.5" fill="#2563eb" rx="2"/>
-<text x="229.0" y="94.5" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">+0.9</text>
-<text x="229.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(4, 5)</text>
-<rect x="277" y="122.5" width="52" height="27.5" fill="#2563eb" rx="2"/>
-<text x="303.0" y="116.5" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">+0.5</text>
-<text x="303.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(4, 4)</text>
-<rect x="351" y="150.0" width="52" height="27.5" fill="#d97706" rx="2"/>
-<text x="377.0" y="136.5" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">-0.5</text>
-<text x="377.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(3, 3)</text>
-<rect x="425" y="150.0" width="52" height="49.5" fill="#d97706" rx="2"/>
-<text x="451.0" y="114.5" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">-0.9</text>
-<text x="451.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(2, 3)</text>
-<rect x="499" y="150.0" width="52" height="49.5" fill="#d97706" rx="2"/>
-<text x="525.0" y="114.5" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">-0.9</text>
-<text x="525.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(3, 2)</text>
-<rect x="573" y="150.0" width="52" height="77.0" fill="#d97706" rx="2"/>
-<text x="599.0" y="87.0" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">-1.4</text>
-<text x="599.0" y="180" text-anchor="middle" font-size="11.5" fill="#374151">(2, 2)</text>
-<text x="45" y="202" font-size="11.5" fill="#6b7280">横轴：评审打分（连贯性, 切题性）</text>
-<text x="635" y="144" text-anchor="end" font-size="11.5" fill="#6b7280">组内调整后的奖励（0 = 组平均）</text>
-</svg>
-<figcaption>同一个问题的 8 个回答。横轴上是评审给的两项分数（连贯性, 切题性）；柱高是折算、组内比较之后的奖励。这一组原始奖励的平均值是 0.625，减去组平均再除以波动后：前四个回答被往上推（+1.4 ～ +0.5），后四个被往下压（−0.5 ～ −1.4）。</figcaption>
-</figure>
+<p class="small">〔译者注：以下配图原样取自原文页面，图形、英文标签与交互行为均未翻译、未重绘。〕</p>
+<figure class="diagram" id="group-diagram">
+            <div class="diagram-scroll">
+              <svg
+                viewBox="0 0 640 232"
+                role="img"
+                aria-label="Example: 8 answers to one prompt, with rewards from 1 down to 0.25 and a group average of 0.625. The four answers above the average get positive numbers, from +1.4 to +0.5, and are pushed up. The four below get negative numbers and are pushed down."
+              >
+                <text class="strong" x="44" y="14">8 answers to one prompt</text>
+                <text class="muted" x="40" y="28" text-anchor="end">reward</text>
+                <line class="grid" x1="48" y1="40" x2="548" y2="40" />
+                <line class="grid" x1="48" y1="115" x2="548" y2="115" />
+                <line class="rule" x1="48" y1="190" x2="548" y2="190" />
+                <text class="muted" x="40" y="44" text-anchor="end">1</text>
+                <text class="muted" x="40" y="119" text-anchor="end">0.5</text>
+                <text class="muted" x="40" y="194" text-anchor="end">0</text>
+
+                <!-- rewards 1, .875, .875, .75 | .5, .375, .375, .25; average .625, spread .265 -->
+                <rect class="bar-good" x="58" y="40" width="40" height="150" />
+                <rect class="bar-good" x="120" y="58.75" width="40" height="131.25" />
+                <rect class="bar-good" x="182" y="58.75" width="40" height="131.25" />
+                <rect class="bar-good" x="244" y="77.5" width="40" height="112.5" />
+                <rect class="bar-bad" x="306" y="115" width="40" height="75" />
+                <rect class="bar-bad" x="368" y="133.75" width="40" height="56.25" />
+                <rect class="bar-bad" x="430" y="133.75" width="40" height="56.25" />
+                <rect class="bar-bad" x="492" y="152.5" width="40" height="37.5" />
+
+                <text class="strong good" x="78" y="34" text-anchor="middle">+1.4</text>
+                <text class="strong good" x="140" y="52.75" text-anchor="middle">+0.9</text>
+                <text class="strong good" x="202" y="52.75" text-anchor="middle">+0.9</text>
+                <text class="strong good" x="264" y="71.5" text-anchor="middle">+0.5</text>
+                <text class="strong bad" x="326" y="109" text-anchor="middle">&minus;0.5</text>
+                <text class="strong bad" x="388" y="127.75" text-anchor="middle">&minus;0.9</text>
+                <text class="strong bad" x="450" y="127.75" text-anchor="middle">&minus;0.9</text>
+                <text class="strong bad" x="512" y="146.5" text-anchor="middle">&minus;1.4</text>
+
+                <text class="muted" x="78" y="206" text-anchor="middle">5, 5</text>
+                <text class="muted" x="140" y="206" text-anchor="middle">5, 4</text>
+                <text class="muted" x="202" y="206" text-anchor="middle">4, 5</text>
+                <text class="muted" x="264" y="206" text-anchor="middle">4, 4</text>
+                <text class="muted" x="326" y="206" text-anchor="middle">3, 3</text>
+                <text class="muted" x="388" y="206" text-anchor="middle">2, 3</text>
+                <text class="muted" x="450" y="206" text-anchor="middle">3, 2</text>
+                <text class="muted" x="512" y="206" text-anchor="middle">2, 2</text>
+                <text class="muted" x="298" y="224" text-anchor="middle">judge scores (coherence, responds)</text>
+
+                <line class="average" x1="48" y1="96.25" x2="548" y2="96.25" />
+                <text x="552" y="100">average 0.625</text>
+                <text class="good" x="552" y="70">&uarr; pushed up</text>
+                <text class="bad" x="552" y="134">&darr; pushed down</text>
+              </svg>
+            </div>
+            <figcaption>
+              The number above each bar
+              is the answer&rsquo;s group-adjusted reward.
+            </figcaption>
+          </figure>
 
 <p>我实际使用的配置如下：</p>
 
@@ -323,87 +349,107 @@ That it brings us all into its calm.</div>
 
 <p class="small">* 为了弄清楚"换一批评测题目"会带来多大波动，我把 50 道评测题随机重抽了 1,000 次（允许重复抽到同一题），每次都保留该题的全部 4 个回答，并用同一批抽出的题分别计算训练前后的得分，再算提升。展示的范围去掉了这 1,000 个提升里最低的 5% 和最高的 5%，只保留中间 90%。这种统计方法叫"配对自助法重采样"（paired bootstrap，一种用重复抽样来估计不确定性的常用手法）。</p>
 
-<figure>
-<svg viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RL 训练过程中的可用率折线图" style="width:100%;height:auto;font-family:system-ui,-apple-system,'Segoe UI',sans-serif">
-<rect width="100%" height="100%" fill="none"/>
-<line x1="50" y1="300.0" x2="666" y2="300.0" stroke="#e3e6ea" stroke-width="1"/>
-<text x="42" y="304.0" text-anchor="end" font-size="11" fill="#6b7280">0%</text>
-<line x1="50" y1="262.0" x2="666" y2="262.0" stroke="#e3e6ea" stroke-width="1"/>
-<text x="42" y="266.0" text-anchor="end" font-size="11" fill="#6b7280">10%</text>
-<line x1="50" y1="224.0" x2="666" y2="224.0" stroke="#e3e6ea" stroke-width="1"/>
-<text x="42" y="228.0" text-anchor="end" font-size="11" fill="#6b7280">20%</text>
-<line x1="50" y1="186.0" x2="666" y2="186.0" stroke="#e3e6ea" stroke-width="1"/>
-<text x="42" y="190.0" text-anchor="end" font-size="11" fill="#6b7280">30%</text>
-<line x1="50" y1="148.0" x2="666" y2="148.0" stroke="#e3e6ea" stroke-width="1"/>
-<text x="42" y="152.0" text-anchor="end" font-size="11" fill="#6b7280">40%</text>
-<line x1="50" y1="110.0" x2="666" y2="110.0" stroke="#e3e6ea" stroke-width="1"/>
-<text x="42" y="114.0" text-anchor="end" font-size="11" fill="#6b7280">50%</text>
-<line x1="50" y1="72.0" x2="666" y2="72.0" stroke="#e3e6ea" stroke-width="1"/>
-<text x="42" y="76.0" text-anchor="end" font-size="11" fill="#6b7280">60%</text>
-<line x1="50" y1="34.0" x2="666" y2="34.0" stroke="#e3e6ea" stroke-width="1"/>
-<text x="42" y="38.0" text-anchor="end" font-size="11" fill="#6b7280">70%</text>
-<text x="50.0" y="316" text-anchor="middle" font-size="11" fill="#6b7280">0</text>
-<text x="152.7" y="316" text-anchor="middle" font-size="11" fill="#6b7280">50</text>
-<text x="255.3" y="316" text-anchor="middle" font-size="11" fill="#6b7280">100</text>
-<text x="358.0" y="316" text-anchor="middle" font-size="11" fill="#6b7280">150</text>
-<text x="460.7" y="316" text-anchor="middle" font-size="11" fill="#6b7280">200</text>
-<text x="563.3" y="316" text-anchor="middle" font-size="11" fill="#6b7280">250</text>
-<text x="666.0" y="316" text-anchor="middle" font-size="11" fill="#6b7280">300</text>
-<text x="358" y="334" text-anchor="middle" font-size="12" fill="#374151">RL 训练步数</text>
-<text x="14" y="167" transform="rotate(-90 14 167)" text-anchor="middle" font-size="12" fill="#374151">可用率</text>
-<polyline points="50.0,201.2 101.3,193.6 152.7,170.8 204.0,149.9 255.3,132.8 306.7,132.8 358.0,167.0 409.3,155.6 460.7,151.8 512.0,161.3 563.3,148.0 614.7,148.0 666.0,136.6" fill="none" stroke="#9ca3af" stroke-width="2.5"/>
-<circle cx="50.0" cy="201.2" r="3" fill="#9ca3af"/>
-<circle cx="101.3" cy="193.6" r="3" fill="#9ca3af"/>
-<circle cx="152.7" cy="170.8" r="3" fill="#9ca3af"/>
-<circle cx="204.0" cy="149.9" r="3" fill="#9ca3af"/>
-<circle cx="255.3" cy="132.8" r="3" fill="#9ca3af"/>
-<circle cx="306.7" cy="132.8" r="3" fill="#9ca3af"/>
-<circle cx="358.0" cy="167.0" r="3" fill="#9ca3af"/>
-<circle cx="409.3" cy="155.6" r="3" fill="#9ca3af"/>
-<circle cx="460.7" cy="151.8" r="3" fill="#9ca3af"/>
-<circle cx="512.0" cy="161.3" r="3" fill="#9ca3af"/>
-<circle cx="563.3" cy="148.0" r="3" fill="#9ca3af"/>
-<circle cx="614.7" cy="148.0" r="3" fill="#9ca3af"/>
-<circle cx="666.0" cy="136.6" r="3" fill="#9ca3af"/>
-<polyline points="50.0,167.0 101.3,136.6 152.7,98.6 204.0,89.1 255.3,106.2 306.7,77.7 358.0,72.0 409.3,85.3 460.7,70.1 512.0,66.3 563.3,66.3 614.7,75.8 666.0,70.1" fill="none" stroke="#2563eb" stroke-width="2.5"/>
-<circle cx="50.0" cy="167.0" r="3" fill="#2563eb"/>
-<circle cx="101.3" cy="136.6" r="3" fill="#2563eb"/>
-<circle cx="152.7" cy="98.6" r="3" fill="#2563eb"/>
-<circle cx="204.0" cy="89.1" r="3" fill="#2563eb"/>
-<circle cx="255.3" cy="106.2" r="3" fill="#2563eb"/>
-<circle cx="306.7" cy="77.7" r="3" fill="#2563eb"/>
-<circle cx="358.0" cy="72.0" r="3" fill="#2563eb"/>
-<circle cx="409.3" cy="85.3" r="3" fill="#2563eb"/>
-<circle cx="460.7" cy="70.1" r="3" fill="#2563eb"/>
-<circle cx="512.0" cy="66.3" r="3" fill="#2563eb"/>
-<circle cx="563.3" cy="66.3" r="3" fill="#2563eb"/>
-<circle cx="614.7" cy="75.8" r="3" fill="#2563eb"/>
-<circle cx="666.0" cy="70.1" r="3" fill="#2563eb"/>
-<line x1="60" y1="16" x2="88" y2="16" stroke="#2563eb" stroke-width="2.5"/><text x="94" y="20" font-size="12" fill="#374151">起点：SFT-180 适配器（35%）</text>
-<line x1="300" y1="16" x2="328" y2="16" stroke="#9ca3af" stroke-width="2.5"/><text x="334" y="20" font-size="12" fill="#374151">起点：只加屏蔽（26%）</text>
-</svg>
-<figcaption>RL 训练过程中的可用率。两条曲线分别是两个起点：SFT 适配器（蓝）与只加屏蔽的模型（灰）。完整数据见下方折叠表。</figcaption>
-</figure>
-
-<details>
-<summary>展示每一步的数字</summary>
-<table>
-  <tr><th>RL 步数</th><th class="num">加屏蔽的模型</th><th class="num">SFT 适配器</th></tr>
-  <tr><td>0</td><td class="num">26%（19 到 33%）</td><td class="num">35%（27 到 43.5%）</td></tr>
-  <tr><td>25</td><td class="num">28%（20.5 到 36%）</td><td class="num">43%（34 到 52.5%）</td></tr>
-  <tr><td>50</td><td class="num">34%（25.5 到 43%）</td><td class="num">53%（44.5 到 62%）</td></tr>
-  <tr><td>75</td><td class="num">39.5%（31 到 48.5%）</td><td class="num">55.5%（47 到 64.5%）</td></tr>
-  <tr><td>100</td><td class="num">44%（35.5 到 53%）</td><td class="num">51%（42 到 60%）</td></tr>
-  <tr><td>125</td><td class="num">44%（34 到 53%）</td><td class="num">58.5%（50 到 68%）</td></tr>
-  <tr><td>150</td><td class="num">35%（26.5 到 44%）</td><td class="num">60%（52 到 68%）</td></tr>
-  <tr><td>175</td><td class="num">38%（29 到 48%）</td><td class="num">56.5%（47.5 到 65.5%）</td></tr>
-  <tr><td>200</td><td class="num">39%（30 到 47%）</td><td class="num">60.5%（52 到 70%）</td></tr>
-  <tr><td>225</td><td class="num">36.5%（28 到 45%）</td><td class="num">61.5%（53 到 70%）</td></tr>
-  <tr><td>250</td><td class="num">40%（32 到 48%）</td><td class="num">61.5%（53.5 到 69.5%）</td></tr>
-  <tr><td>275</td><td class="num">40%（31.5 到 48%）</td><td class="num">59%（50 到 68%）</td></tr>
-  <tr><td>300</td><td class="num">43%（34.5 到 51.5%）</td><td class="num">60.5%（51 到 69.5%）</td></tr>
-</table>
-</details>
+<p class="small">〔译者注：以下配图原样取自原文页面，图形、英文标签与交互行为均未翻译、未重绘。〕</p>
+<figure class="chart" id="rl-chart">
+            <figcaption>
+              <div class="chart-title">Usable rate during RL</div>
+            </figcaption>
+            <ul class="chart-legend">
+              <li>
+                <span class="key s1" aria-hidden="true"></span>SFT adapter
+              </li>
+              <li><span class="key s2" aria-hidden="true"></span>Masked</li>
+            </ul>
+            <div
+              class="chart-plot"
+              tabindex="0"
+              role="group"
+              aria-label="Usable rate by RL step. Use the left and right arrow keys to step through the values."
+            >
+              <div class="chart-tooltip" aria-live="polite" hidden></div>
+            </div>
+            <details class="chart-table">
+              <summary>Show the numbers</summary>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>RL step</th>
+                      <th class="num">Masked</th>
+                      <th class="num">SFT adapter</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>0</td>
+                      <td class="num">26% (19 to 33%)</td>
+                      <td class="num">35% (27 to 43.5%)</td>
+                    </tr>
+                    <tr>
+                      <td>25</td>
+                      <td class="num">28% (20.5 to 36%)</td>
+                      <td class="num">43% (34 to 52.5%)</td>
+                    </tr>
+                    <tr>
+                      <td>50</td>
+                      <td class="num">34% (25.5 to 43%)</td>
+                      <td class="num">53% (44.5 to 62%)</td>
+                    </tr>
+                    <tr>
+                      <td>75</td>
+                      <td class="num">39.5% (31 to 48.5%)</td>
+                      <td class="num">55.5% (47 to 64.5%)</td>
+                    </tr>
+                    <tr>
+                      <td>100</td>
+                      <td class="num">44% (35.5 to 53%)</td>
+                      <td class="num">51% (42 to 60%)</td>
+                    </tr>
+                    <tr>
+                      <td>125</td>
+                      <td class="num">44% (34 to 53%)</td>
+                      <td class="num">58.5% (50 to 68%)</td>
+                    </tr>
+                    <tr>
+                      <td>150</td>
+                      <td class="num">35% (26.5 to 44%)</td>
+                      <td class="num">60% (52 to 68%)</td>
+                    </tr>
+                    <tr>
+                      <td>175</td>
+                      <td class="num">38% (29 to 48%)</td>
+                      <td class="num">56.5% (47.5 to 65.5%)</td>
+                    </tr>
+                    <tr>
+                      <td>200</td>
+                      <td class="num">39% (30 to 47%)</td>
+                      <td class="num">60.5% (52 to 70%)</td>
+                    </tr>
+                    <tr>
+                      <td>225</td>
+                      <td class="num">36.5% (28 to 45%)</td>
+                      <td class="num">61.5% (53 to 70%)</td>
+                    </tr>
+                    <tr>
+                      <td>250</td>
+                      <td class="num">40% (32 to 48%)</td>
+                      <td class="num">61.5% (53.5 to 69.5%)</td>
+                    </tr>
+                    <tr>
+                      <td>275</td>
+                      <td class="num">40% (31.5 to 48%)</td>
+                      <td class="num">59% (50 to 68%)</td>
+                    </tr>
+                    <tr>
+                      <td>300</td>
+                      <td class="num">43% (34.5 to 51.5%)</td>
+                      <td class="num">60.5% (51 to 69.5%)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          </figure>
 
 <p>SFT 适配器是更好的起点：它起步高 9 个百分点，最后挣得也更多——SFT 数据带来的好处留下来了。两次训练的主要收益都在第 125 步前后拿到，之后基本走平。</p>
 
@@ -450,15 +496,45 @@ That it brings us all into its calm.</div>
 
 <p>那么，最后事情到了哪一步？一开始，加屏蔽的模型大约每 4 个回答里只有 1 个可用。经过 180 条无 e 例句的 SFT 和 300 步 RL 之后，大约是每 10 个里有 6 个。而且对 SFT 适配器来说，我专门检验过，这份提升并不是"因为写得少了"才拿到的。它有时候仍然会偷懒（见前面的"football"），但和当初那句"riddiculous"相比，它已经非常接近那个干净利落的土拨鼠答案了。</p>
 
-<p>下面是评测集中每个回答在各个阶段的结果。原文是一张交互散点图，把鼠标悬停或点在每个圆点上就能读那则回答；本页以摘要代替，完整交互版见<a href="https://kevin-wu.ca/blog/qwn/">原文</a>。</p>
+<p>下面是评测集中每个回答在各个阶段的结果：把鼠标悬停或点在每个圆点上，就能读到那则回答的全文（也支持键盘方向键）：</p>
 
-<div class="stats">
-  <div class="stat"><div class="big bad">0 / 200</div><div class="cap">不加屏蔽<br>可用数</div></div>
-  <div class="stat"><div class="big mid">52 / 200</div><div class="cap">加屏蔽<br>可用数</div></div>
-  <div class="stat"><div class="big ok">121 / 200</div><div class="cap">SFT 适配器 + RL 300 步<br>可用数</div></div>
-</div>
-
-<p class="small">每个数据点是一则回答：50 道评测题 × 每题 4 条。"可用"= 不含 e，且评审给出的连贯性、切题性都 ≥ 4。原图图例：绿色为可用；灰色为某一项评分低于 4；红色为含 e。</p>
+<p class="small">〔译者注：以下配图原样取自原文页面，图形、英文标签与交互行为均未翻译、未重绘。〕</p>
+<figure class="dots" id="eval-dots">
+            <div class="dots-grids">
+              <div class="dots-grid" data-run="qwen">
+                <p class="dots-title">Unmasked</p>
+                <p class="dots-count"><strong>0</strong> of 200 usable</p>
+                <svg viewBox="0 0 240 120" tabindex="0" role="img" aria-label="Unmasked: 0 of 200 answers usable. All 200 contain an &lsquo;e&rsquo;. Use the arrow keys to read each answer."></svg>
+              </div>
+              <div class="dots-grid" data-run="baseline">
+                <p class="dots-title">Masked</p>
+                <p class="dots-count"><strong>52</strong> of 200 usable</p>
+                <svg viewBox="0 0 240 120" tabindex="0" role="img" aria-label="Masked: 52 of 200 answers usable. The judge scored the other 148 under 4. Use the arrow keys to read each answer."></svg>
+              </div>
+              <div class="dots-grid" data-run="final">
+                <p class="dots-title">SFT adapter after 300 RL steps</p>
+                <p class="dots-count"><strong>121</strong> of 200 usable</p>
+                <svg viewBox="0 0 240 120" tabindex="0" role="img" aria-label="SFT adapter after 300 RL steps: 121 of 200 answers usable. The judge scored the other 79 under 4. Use the arrow keys to read each answer."></svg>
+              </div>
+              <div class="dots-tip" aria-live="polite" hidden></div>
+            </div>
+            <ul class="dots-key">
+              <li>
+                <svg viewBox="0 0 12 12" aria-hidden="true"><circle class="dot-ok" cx="6" cy="6" r="4.3" /></svg>usable
+              </li>
+              <li>
+                <svg viewBox="0 0 12 12" aria-hidden="true"><circle class="dot-judge" cx="6" cy="6" r="3.7" /></svg>the judge gave it under 4 for coherence or responding
+              </li>
+              <li>
+                <svg viewBox="0 0 12 12" aria-hidden="true"><circle class="dot-e" cx="6" cy="6" r="4.3" /></svg>contains an &lsquo;e&rsquo;
+              </li>
+            </ul>
+            <figcaption>
+              Each dot is one answer: 50 eval prompts, 4 answers each. An
+              answer is usable if it has no &lsquo;e&rsquo; and the judge gives
+              it at least 4 for both coherence and responding.
+            </figcaption>
+          </figure>
 
 <h2 id="takeaways">经验与下一步</h2>
 
@@ -668,5 +744,7 @@ rewards = get_feedback(gen_ids, e_table) - kl_beta * kl_approx</code></pre>
 </footer>
 
 </div>
+<script type="module" src="./rl-chart.js"></script>
+<script type="module" src="./eval-dots.js"></script>
 </body>
 </html>
